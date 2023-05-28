@@ -1,80 +1,3 @@
-import SlimSelect from 'slim-select';
-import Notiflix from 'notiflix';
-
-import { fetchBreeds } from './cat-api.js';
-
-// Виклик функції fetchBreeds() для отримання масиву порід
-fetchBreeds()
-  .then(breeds => {
-    // Використовуйте масив порід тут, наприклад, для наповнення select елемента
-    const selectElement = document.querySelector('.breed-select');
-    breeds.forEach(breed => {
-      const option = document.createElement('option');
-      option.value = breed.id;
-      option.textContent = breed.name;
-      selectElement.appendChild(option);
-    });
-  })
-  .catch(error => {
-    console.log(error);
-  });
-
-  import { fetchCatByBreed } from './cat-api.js';
-
-const breedSelect = document.querySelector('.breed-select');
-const catInfo = document.querySelector('.cat-info');
-
-breedSelect.addEventListener('change', () => {
-  const selectedBreedId = breedSelect.value;
-  
-  showLoader();
-
-  fetchCatByBreed(selectedBreedId)
-    .then(data => {
-      hideLoader();
-      showCatInfo(data);
-    })
-    .catch(error => {
-      hideLoader();
-      showError();
-      console.log(error);
-    });
-});
-function showLoader() {
-  const loader = document.querySelector('.loader');
-  loader.style.display = 'block';
-}
-
-function hideLoader() {
-  const loader = document.querySelector('.loader');
-  loader.style.display = 'none';
-}
-
-function showError() {
-  const error = document.querySelector('.error');
-  error.style.display = 'block';
-}
-
-function hideError() {
-  const error = document.querySelector('.error');
-  error.style.display = 'none';
-}
-
-function showCatInfo(cat) {
-  const { breeds, url } = cat;
-  const breed = breeds[0];
-
-  const catInfoHTML = `
-    <h2>Cat Information</h2>
-    <p><strong>Breed:</strong> ${breed.name}</p>
-    <p><strong>Description:</strong> ${breed.description}</p>
-    <p><strong>Temperament:</strong> ${breed.temperament}</p>
-    <img src="${url}" alt="Cat Image">
-  `;
-  catInfo.innerHTML = catInfoHTML;
-}
-
-
 // const URL = "https://api.thecatapi.com/v1/breeds";
 // const API_KEY = "live_CrqT7ZvnaVE9mwMgaNSEZPVbet7dJRSZ8ze5EJMIhCnHY9ZjrJZwwwCJIsZMMh22";
 
@@ -82,3 +5,35 @@ function showCatInfo(cat) {
 //   return fetch(`${URL}?apiKey=${API_KEY}&q=${quary}`).then((res) => res.json()); 
 // }
 // export default { getNews };
+import { fetchBreeds, fetchCatByBreed } from './cat-api';
+const breedSelector = document.querySelector('.breed-select');
+const img = document.querySelector('.image');
+const catsBreed = document.querySelector('.cats-breed');
+const description = document.querySelector('.cats-description');
+const temperament = document.querySelector('.cats-temperament');
+const catInfo = document.querySelector('.cat-info');
+const loader = document.querySelector('.loader');
+
+fetchBreeds().then(data => {
+    loader.style.display = "none";
+    breedSelector.style.display = "block";
+    const breeds = data.map(({ id, name }) => `<option value="${id}">${name}</option>`).join('');
+    breedSelector.insertAdjacentHTML('beforeend', breeds);
+}).catch(err => console.log(err));
+
+breedSelector.addEventListener('change', (e) => {
+    const breedId = e.target.value;
+    loader.style.display = "block";
+    catInfo.style.display = "none";
+    
+    fetchCatByBreed(breedId).then(data => {
+        catInfo.style.display = "flex";
+        loader.style.display = "none";
+        const breed = data[0];
+        
+        img.src = data[0].url;
+        catsBreed.textContent = breed.breeds[0].name;
+        description.textContent = breed.breeds[0].description;
+        temperament.innerHTML = `<span class="span">Temperament: </span>${breed.breeds[0].temperament}`;
+    }).catch(err => console.log(err))
+});

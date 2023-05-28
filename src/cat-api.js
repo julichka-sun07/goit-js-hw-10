@@ -1,42 +1,41 @@
-export function fetchBreeds() {
-    return fetch('https://api.thecatapi.com/v1/breeds')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Не вдалося отримати список порід.');
-        }
-        return response.json();
-      })
-      .then(data => {
-        return data.map(breed => ({
-          id: breed.id,
-          name: breed.name
-        }));
-      });
-  }
-
-  export function fetchCatByBreed(breedId) {
-    const url = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`;
-  
-    return fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch cat information.');
-        }
-        return response.json();
-      })
-      .then(data => {
-        return data;
-      })
-      .catch(error => {
-        throw error;
-      });
-  }
 
 // import API from "./index.js";
 
 // API.getNews("gpt-3").then((result) => console.log(result));
+// import { fetchBreeds, fetchCatByBreed } from './cat-api';
 
+import Notiflix from 'notiflix';
 
+const error = document.querySelector('.error');
+const loader = document.querySelector('.loader');
 
+export function fetchBreeds() {
+    const url = 'https://api.thecatapi.com/v1/breeds';
+    const api_key = 'live_CrqT7ZvnaVE9mwMgaNSEZPVbet7dJRSZ8ze5EJMIhCnHY9ZjrJZwwwCJIsZMMh22';
+
+    return fetch(`${url}?api_key=${api_key}`).then(resp => {
+        if (!resp.ok) {
+            loader.style.display = "none";
+            Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!');
+            throw new Error(resp.statusText);
+        }
+
+        return resp.json();
+    })
+};
+
+export function fetchCatByBreed(breedId) {
+    const url = 'https://api.thecatapi.com/v1/images/search';
+    const api_key = 'live_CrqT7ZvnaVE9mwMgaNSEZPVbet7dJRSZ8ze5EJMIhCnHY9ZjrJZwwwCJIsZMMh22';
+
+    return fetch(`${url}?breed_ids=${breedId}&api_key=${api_key}`).then(resp => {
+        if (!resp.ok) {
+            Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!');
+            throw new Error(resp.statusText);
+        }
+        
+        return resp.json();
+    })
+}
     
       
